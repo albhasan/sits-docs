@@ -15,6 +15,9 @@ presentations, and papers.
   - [“SITS: Data Analysis and Machine Learning for Data Cubes using
     Satellite Image Time
     Series”](https://github.com/e-sensing/sits-docs/blob/master/doc/sits.pdf)
+    
+  - ["Accessing time series information in 
+      SITS"](https://github.com/e-sensing/sits-docs/blob/master/doc/time_series.pdf)
 
   - [“Clustering of Satellite Image Time Series with
     SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/clustering.pdf)
