@@ -6,7 +6,7 @@ Documentation for the SITS Package
 The SITS package (“Satellite Image Time Series Analysis for Earth
 Observation Data”) provides a set of tools for analysis, visualization
 and classification of satellite image time series. It includes methods
-for filtering, clustering, classification, and post-processing. Thist
+for filtering, clustering, classification, and post-processing. This
 github site has documentation on SITS, including vignettes,
 presentations, and papers.
 
@@ -14,16 +14,16 @@ presentations, and papers.
 
   - [“SITS: Data Analysis and Machine Learning for Data Cubes using
     Satellite Image Time
-    Series”](https://github.com/e-sensing/sits-docs/blob/master/vignettes/sits.pdf)
+    Series”](https://github.com/e-sensing/sits-docs/blob/master/doc/sits.pdf)
 
   - [“Clustering of Satellite Image Time Series with
-    SITS”](https://github.com/e-sensing/sits-docs/blob/master/vignettes/clustering.pdf)
+    SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/clustering.pdf)
 
   - [“Satellite Image Time Series Filtering with
-    SITS”](https://github.com/e-sensing/sits-docs/blob/master/vignettes/filtering.pdf)
+    SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/filtering.pdf)
 
   - [“Time Series classification using machine
-    learning”](https://github.com/e-sensing/sits-docs/blob/master/vignettes/machine_learning.pdf)
+    learning”](https://github.com/e-sensing/sits-docs/blob/master/doc/machine_learning.pdf)
 
   - [“Post classification smoothing using Bayesian techniques in
-    SITS”](https://github.com/e-sensing/sits-docs/blob/master/vignettes/smoothing.pdf)
+    SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/smoothing.pdf)
