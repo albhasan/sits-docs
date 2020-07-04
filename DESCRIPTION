@@ -1,0 +1,27 @@
+Package: sits.docs
+Type: Package
+Title: Documentation for the SITS Package Sensing Data Cubes
+Version: 0.1.0
+Authors@R: c(person('Rolf', 'Simoes', role = c('aut'), email = 'rolf.simoes@inpe.br'),
+             person('Gilberto', 'Camara', role = c('aut', 'cre'), email = 'gilberto.camara@inpe.br'),
+             person('Pedro', 'Andrade', role = c('aut'), email = 'pedro.andrade@inpe.br'),
+             person('Lorena', 'Santos', role = c('aut'), email = 'lorena.santos@inpe.br'),
+             person('Gilberto', 'Queiroz', role = c('aut'), email = 'gilberto.queiroz@inpe.br'),
+             person('Karine', 'Ferreira', role = c('aut'), email = 'karine.ferreira@inpe.br')
+             )
+Maintainer: Gilberto Camara <gilberto.camara@inpe.br>
+Description: Documentation on the SITS package, a set of tools for analysis of satellite image time series.
+Encoding: UTF-8
+Depends: R (>= 3.6.0)
+URL: https://github.com/e-sensing/sits-docs/
+BugReports: https://github.com/e-sensing/sits-docs/issues
+License: GPL-2 | file LICENSE
+ByteCompile: true
+LazyData: true
+Imports:
+    sits
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.0.2
