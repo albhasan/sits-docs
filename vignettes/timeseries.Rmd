@@ -154,14 +154,14 @@ ndvi_file <- system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
                          package = "sits")
 
 # Obtain the associated timeline
-timeline <- data("timeline_2000_2017")
+data("timeline_2000_2017", package = "sits")
 
 # create a raster metadata file based on the information about the files
 raster_cube <- sits_cube(type = "BRICK",
                          name = "Sinop", 
                          satellite = "TERRA",
                          sensor = "MODIS",
-                         timeline = timeline,
+                         timeline = timeline_2000_2017,
                          bands = c("ndvi"), 
                          files = c(ndvi_file))
 
@@ -171,5 +171,69 @@ raster_cube %>% dplyr::select(type, URL, satellite, sensor)
 raster_cube %>% dplyr::select(xmin, xmax, ymin, ymax)
 ```
 
-Once created, the coverage can be used either to retrieve time series data from the raster bricks using `sits_get_data()` or to do the raster classification by calling the function `sits_classify`.
+Once created, the coverage can be used either to retrieve time series data from the raster bricks using `sits_get_data()` or to do the raster classification by calling the function `sits_classify`. 
+```{r}
+# retrieve a list of samples described by a CSV file
+samples.csv <- system.file("extdata/samples/samples_sinop_crop.csv",
+                                   package = "sits")
+# get the points from a data cube in raster brick format
+points.tb <- sits_get_data(raster_cube, file = samples.csv)
+                           
+# show the tibble with the points
+points.tb
+```
  
+# Saving the description of samples and data cubes in an RSQLite database
+
+It is possible to save the time series and the data cube descriptions on an SQLite
+database. `sits` provides four commands to work with SQLite: (a) `sits_db_create` to 
+create a database; (b) `sits_db_write` to write a set of time series or a data cube description to the database; (c) `sits_db_read` to read a set of time series or a data cube description from the database; (d) `sits_db_info` to report the contents of the database. 
+ 
+The example below shows how a set of time samples is written to and read from 
+a database.
+```{r}
+# create RSQLite connection at the user home directory
+home <- Sys.getenv('HOME')
+db_file <- paste0(home,"/sits.sql")
+conn <- sits_db_create(db_file)
+
+# write a set of time series
+conn <- sits_db_write(conn, "cerrado_2classes", cerrado_2classes)
+    
+# read a set of time series
+ts <-  sits_db_read(conn, "cerrado_2classes")
+# print the recovered samples
+ts
+```
+
+The next example shows how to write the contents of the description of a data
+cube to the database.
+
+```{r}
+# files to build a raster cube
+files <- c(system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
+                           package = "sits"))
+
+# create a raster cube file based on the information about the files
+raster.tb <- sits_cube(type = "BRICK", name  = "Sinop-crop",
+                       satellite = "TERRA", sensor = "MODIS",
+                       timeline = timeline_modis_392, bands = "ndvi",
+                       files = files)
+
+# write the description of a raster cube
+conn <- sits_db_write(conn, "sinop", raster.tb)
+
+# read the contents of a raster cube
+cube_raster <- sits_db_read(conn, "sinop")
+# show the retrieved information
+cube_raster
+```
+
+One can also retrieve information on the contents of the database using `sits_db_info`.
+
+```{r}
+# retrieve the contents of the database
+db.tb <- sits_db_info(conn)
+# clean up
+unlink(db_file)
+```
