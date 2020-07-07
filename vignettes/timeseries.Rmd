@@ -90,7 +90,7 @@ For a large number of samples, where the amount of individual plots would be sub
 plot(samples_cerrado.tb)
 ```
 
-# Obtaining time series data
+# Obtaining time series data from WTSS
 
 To get a time series in SITS, one has to create a data cube first, as described above. Alternatively, the time series can also be converted from data stored  in the ZOO format [@Zeileis2005]. Users can request one or more time series points from a data cube by using `sits_get_data()`. This function provides a general means of access to image time series. Given data cue, the user provides the latitude and longitude of the desired location, the bands, and the start date and end date of the time series. If the start and end dates are not provided, it retrieves all the available period. The result is a tibble that can be visualized using `plot()`.
 
@@ -145,7 +145,6 @@ data
 
 The SITS package enables uses to create data cube based on files. In this case, these files should be organized as `raster bricks`. A RasterBrick is a multi-layer raster object used by the \emph{R} `raster` package.  Each brick is a multi-layer file, containing different time instances of one spectral band. To allow users to create data cubes based on files, SITS needs to know the timeline of the data sets, the names of satellite and sensor, and the names of the files that contain the RasterBricks.  The example below shows one bricks containing 392 time instances of the "ndvi" band for the years 2000 to 2016. The timeline is available as part of the SITS package. In this example, as in most cases using raster bricks, images are stored as GeoTiff files.
 
-
 Since GeoTiff files do not contain information about satellites and sensors, it is best practice to provide information on satellite and sensor. 
 
 ```{r}
@@ -172,5 +171,5 @@ raster_cube %>% dplyr::select(type, URL, satellite, sensor)
 raster_cube %>% dplyr::select(xmin, xmax, ymin, ymax)
 ```
 
-To create the raster cube, we a set of consistent raster bricks (one for each satellite band) and a `timeline` that matches the input images of the raster brick. Once created, the coverage can be used either to retrieve time series data from the raster bricks using `sits_get_data()` or to do the raster classification by calling the function `sits_classify`.
+Once created, the coverage can be used either to retrieve time series data from the raster bricks using `sits_get_data()` or to do the raster classification by calling the function `sits_classify`.
  
