@@ -145,6 +145,7 @@ data
 
 The SITS package enables uses to create data cube based on files. In this case, these files should be organized as `raster bricks`. A RasterBrick is a multi-layer raster object used by the \emph{R} `raster` package.  Each brick is a multi-layer file, containing different time instances of one spectral band. To allow users to create data cubes based on files, SITS needs to know the timeline of the data sets, the names of satellite and sensor, and the names of the files that contain the RasterBricks.  The example below shows one bricks containing 392 time instances of the "ndvi" band for the years 2000 to 2016. The timeline is available as part of the SITS package. In this example, as in most cases using raster bricks, images are stored as GeoTiff files.
 
+
 Since GeoTiff files do not contain information about satellites and sensors, it is best practice to provide information on satellite and sensor. 
 
 ```{r}
