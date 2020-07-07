@@ -17,16 +17,16 @@ presentations, and papers.
     Series”](https://github.com/e-sensing/sits-docs/blob/master/doc/sits.pdf)
     
   - ["Accessing time series information in 
-      SITS"](https://github.com/e-sensing/sits-docs/blob/master/doc/time_series.pdf)
+      SITS"](https://github.com/e-sensing/sits-docs/blob/master/doc/timeseries.pdf)
 
   - [“Clustering of Satellite Image Time Series with
     SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/clustering.pdf)
 
   - [“Satellite Image Time Series Filtering with
-    SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/filtering.pdf)
+    SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/filters.pdf)
 
   - [“Time Series classification using machine
-    learning”](https://github.com/e-sensing/sits-docs/blob/master/doc/machine_learning.pdf)
+    learning”](https://github.com/e-sensing/sits-docs/blob/master/doc/machinelearning.pdf)
 
   - [“Post classification smoothing using Bayesian techniques in
     SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/smoothing.pdf)

@@ -36,6 +36,7 @@ vignette: |
 ```{r, include = FALSE}
 devtools::load_all(".")
 library(sits)
+library(sits.docs)
 ```
 # Machine learning classification
 
@@ -190,7 +191,7 @@ Three other important parameters for an MLP are: (a) the activation function; (b
 
 The dropout rates have a huge impact on the performance of MLP  classifiers. Dropout is a technique for randomly  dropping  units  from  the  neural network during training [@Srivastava2014]. By randomly discarding some neurons, dropout reduces overfitting. It is a counter-intuitive idea that works well. Since the purpose of a cascade of neural nets is to improve learning as more data is acquired, discarding some of these neurons may seem a waste of resources. In fact, as experience has shown [@Goodfellow2016], this procedures prevents an early convergence of the optimization to a local minimum. Thus, in practice, dropout rates between 50% and 20% are recommended for each layer. 
 
-In the following example, we classify the same data set using an example of the `deep learning` method. The parameters for the MLP are: (a) Three layers with 512 neurons each, specified by the parameter `layers`; (b) Using the 'elu' activation function; (c) dropout rates of 50%, 40% and 30% for the layers; (d) the "optimizer_adam" as optimizer (default value); (e) a number of training steps (`epochs`) of 75; (f) a `batch_size` of 128, which indicates how many time series are used for input at a given steps; (g) a validation percentage of 20%, which means 20% of the samples will be randomly set side for validation. In practice, users may want to increase the number of epochs and the number of layers. In our experience, if the training dataset is of good quality, using 3 to 5 layers is a reasonable compromise. Further increase on the number of layers will not improve the model. If a better performance is required, users should try to use the convolutional models descibed below. To simplify the vignette generation, the `verbose` option has been turned off. The default value is on. After the model has been generated, we plot its training history and then classify a 16-year time series.
+In the following example, we classify the same data set using an example of the `deep learning` method. The parameters for the MLP are: (a) Three layers with 512 neurons each, specified by the parameter `layers`; (b) Using the 'elu' activation function; (c) dropout rates of 50%, 40% and 30% for the layers; (d) the "optimizer_adam" as optimizer (default value); (e) a number of training steps (`epochs`) of 75; (f) a `batch_size` of 128, which indicates how many time series are used for input at a given steps; (g) a validation percentage of 20%, which means 20% of the samples will be randomly set side for validation. In practice, users may want to increase the number of epochs and the number of layers. In our experience, if the training dataset is of good quality, using 3 to 5 layers is a reasonable compromise. Further increase on the number of layers will not improve the model. If a better performance is required, users should try to use the convolutional models descibed below. To simplify the vignette generation, the `verbose` option has been turned off. The default value is on. After the model has been generated, we plot its training history. 
 
 ```{r, warning = FALSE, message = FALSE}
 # train a machine learning model for the Mato Grosso data using an MLP
@@ -207,6 +208,14 @@ mlp_model <- sits_train(mt_2bands, sits_deeplearning(
 plot(mlp_model)
 ```
 
+Then, we classify a 16-year time series using the DL model
+```{r}
+# Classify using DL model and plot the result
+class.tb <- point_mt_2bands %>% 
+    sits_classify(mlp_model) %>% 
+    plot(bands = c("ndvi", "evi"))
+```
+
 
 # 1D Convolutional Neural Networks
 
@@ -217,7 +226,7 @@ SITS includes four different variations of 1D-CNN, described in what follows. Th
 
 ```{r, echo = FALSE, out.width = "80%", out.height = "80%", fig.align="center", fig.cap="Structure of fullCNN architecture (source: Wang et al.(2017))"}
 
-knitr::include_graphics(system.file("extdata/markdown/figures", "fullcnn.png", package = "sits"))
+knitr::include_graphics(system.file("/extdata/markdown/figures/", "fullcnn.png", package = "sits.docs"))
 ```
 
 The `sits_FCN` function uses the architecture proposed by Wang as its default, and allows the users to experiment with different settings. The `layers` parameter controls the number of layers and the number of filters in each layer. The `kernels` parameters controls the size of the convolution kernels for earh layer. In the example below, the first convolution uses 64 filters with a kernel size of 8, followed by a second convolution of 128 filters with a kernel size of 5, and a third and final convolutional layer with 64 filters, each one with a kernel size to 3.
@@ -237,6 +246,13 @@ fcn_model <- sits_train(mt_2bands,
 plot(fcn_model)
 ```
 
+Then, we classify a 16-year time series using the FCN model
+```{r}
+# Classify using DL model and plot the result
+class.tb <- point_mt_2bands %>% 
+    sits_classify(fcn_model) %>% 
+    plot(bands = c("ndvi", "evi"))
+```
 
 # Residual 1D CNN Networks (ResNet)
 
@@ -244,7 +260,7 @@ The Residual Network (ResNet) is a variation of the fullCNN network proposed by 
 
 ```{r, echo = FALSE, out.width = "80%", out.height = "80%", fig.align="center", fig.cap="Structure of ResNet architecture (source: Wang et al.(2017))"}
 
-knitr::include_graphics(system.file("extdata/markdown/figures", "resnet.png", package = "sits"))
+knitr::include_graphics(system.file("extdata/markdown/figures", "resnet.png", package = "sits.docs"))
 ```
 
 In SITS, the ResNet is implemented using the `sits_resnet` function. The default parameters are those proposed by @Wang2017, and we also benefited from the code provided by @Fawaz2019 ( https://github.com/hfawaz/dl-4-tsc). The first parameter is `blocks`, which controls the number of blocks and the size of filters in each block. By default, the model implements three blocks, the first with 64 filters and the others with 128 filters. Users can control the number of blocks and filter size by changing this parameter. The parameter `kernels` controls the size the of kernels of the three layers inside each block. @Wang2017 proposes to use kernels of sizes 8,5, and 3. We have found out that it is useful to experiment a bit with these kernel sizes in the case of satellite image time series. The default activation is "relu", which is recommended in the literature to reduce the problem of vanishing gradients. The default optimizer is the same as proposed in @Wang2017 and @Fawaz2019. In the case of the 2-band Mato Grosso data set, the estimated accuracy is 95.8%. 
@@ -264,13 +280,20 @@ resnet_model <- sits_train(mt_2bands,
 plot(resnet_model)
 ```
 
+Then, we classify a 16-year time series using the DL model
+```{r}
+# Classify using DL model and plot the result
+class.tb <- point_mt_2bands %>% 
+    sits_classify(resnet_model) %>% 
+    plot(bands = c("ndvi", "evi"))
+```
 # Combined 1D CNN and multi-layer perceptron networks
 
 The combination of 1D CNNs and multi-layer perceptron models for satellite image time series classification was first proposed in @Pelletier2019. The so-called "tempCNN" architecture consists of a number of 1D-CNN layers, similar to the fullCNN model discussed above, whose output is fed into a set of multi-layer perceptrons. The original tempCNN architecture is composed of three 1D convolutional layers (each with 64 units), one dense layer of 256 units and a final softmax layer for classification (see figure). The kernel size of the convolution filters is set to 5. The authors use a combination of different methods to avoid overfitting and reduce the vanishing gradiente effect, including dropout, regularization, and batch normalisation. In the tempCNN paper [@Pelletier2019], the authors compare favourably the tempCNN model with the Recurrent Neural Network proposed by @Russwurm2018 for land use classification. The figure below shows the architecture of the tempCNN model.
 
 ```{r, echo = FALSE, fig.align="center", out.width = "80%", out.height = "80%", fig.cap="Structure of tempCNN architecture (source: Pelletier et al.(2019))"}
 
-knitr::include_graphics(system.file("extdata/markdown/figures", "tempcnn.png", package = "sits"))
+knitr::include_graphics(system.file("extdata/markdown/figures/tempcnn.png", package = "sits.docs"))
 ```
 
 The function `sits_tempCNN` implements the model, using the default parameters proposed by @Pelletier2019. The code has been derived from the Python source provided by the authors (https://github.com/charlotte-pel/temporalCNN). The parameter `cnn_layers` controls the number of 1D-CNN layers and the size of the filters applied at each layer; the parameter `cnn_kernels` indicates the size of the convolution kernels. Activation, regularisation for all 1D-CNN layers are set, respectively, by the `cnn_activation`, `cnn_L2_rate`. The dropout rates for each 1D-CNN layer are controlled individually by the parameter `cnn_dropout_rates`. The parameters `mlp_layers` and `mlp_dropout_rates` allow the user to set the number and size of the desired MLP layers, as well as their dropout_rates. The activation of the MLP layers is controlled by `mlp_activation`. By default, the function uses the ADAM optimizer, but any of the optimizers available in the `keras` package can be used. The `validation_split` controls the size of the test set, relative to the full data set. We recommend to set aside at least 20% of the samples for validation. In the case of the 2-band Mato Grosso data set, the estimated accuracy is 95.5%. 
@@ -297,6 +320,13 @@ tCNN_model <- sits_train(mt_2bands,
 plot(tCNN_model)
 ```
 
+Then, we classify a 16-year time series using the DL model
+```{r}
+# Classify using DL model and plot the result
+class.tb <- point_mt_2bands %>% 
+    sits_classify(tCNN_model) %>% 
+    plot(bands = c("ndvi", "evi"))
+```
 # LSTM Convolutional Networks for Time Series Classification 
 
 Given the success of 1D-CNN networks for time series classification, there have been a number of variants proposed in the literature. One of these variants is the LSTM-CNN network [@Karim2018], where a fullCNN is combined with long short term memory (LSTM) recurrent neural network. LSTMs are an improved version of recurrent neural networks (RNN). An RNN is a neural network that includes a state vector, which is updated every time step. In this way, a RNN combines an input vector with information that is kept from all previous inputs. One can conceive of RNN as networks that have loops, allowing information to be passed from one step to to the next. In theory, a RNN would be able to handle long-term dependencies between elements of the input vectors. In practice, they are prone to the exhibit the "vanishing gradient" effect. As discussed above, in deep neural networks architectures with gradient descent optimization the gradient function can approach zero, thus impeding training to be done efficiently. LSTM improve on RNN architecture by including the additional feature of being able to regulate whether or not new information should be included on the cell state. LSTM unit also include a forget gate, which is able to discard the previous information stored in the cell state. Thus, a LSTM unit is able to remember values over arbitrary time intervals.    
@@ -305,7 +335,7 @@ Given the success of 1D-CNN networks for time series classification, there have 
 
 ```{r, echo = FALSE, fig.align="center", out.width = "80%", out.height = "80%", fig.cap= "LSTM Fully Convolutional Networks for Time Series Classification (source: Karim et al.(2019))"}
 
-knitr::include_graphics(system.file("extdata/markdown/figures", "lstm-cnn.png", package = "sits"))
+knitr::include_graphics(system.file("extdata/markdown/figures", "lstm-cnn.png", package = "sits.docs"))
 ```
 
 In the SITS package, the combined LSTM-CNN architecture is implemented by the `sits_LSTM_CNN` function. The default values are similar those proposed by @Karim2019b. The parameter `lstm_units` controls the number of units in the LSTM cell at every time step of the network. @Karim2019b proposes an LSTM with 8 units, each with a dropout rate of 80%, which are controlled by parameters `lstm_units` and `lstm_dropout`. In initial experiments, we got a better performance with an LSTM with 16 units. As proposed by @Karim2019b, the CNN layers have filter sizes of {128, 256, 128} and kernel convolution sizes of {8, 5, 3}, controled by the parameters `cnn_layers` and `cnn_kernels`. One should experiment with these parameters, and consider the simulations carried out by @Pelletier2019 (see above), where the authors found that an FCN network of sizes {64, 64, 64} with kernels sizes of {5, 5, 5} had best performance in their case study. In this example, the estimated accuracy of the model was 94.7%. 
@@ -325,4 +355,12 @@ lstm_fcn_model <- sits_train(mt_2bands,
 
 # show training evolution
 plot(lstm_fcn_model)
+```
+
+Then, we classify a 16-year time series using the DL model
+```{r}
+# Classify using DL model and plot the result
+class.tb <- point_mt_2bands %>% 
+    sits_classify(lstm_fcn_model) %>% 
+    plot(bands = c("ndvi", "evi"))
 ```

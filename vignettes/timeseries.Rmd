@@ -121,7 +121,7 @@ csv_data
 ```
 A common situation is when users have samples available as shapefiles in point format. Since shapefiles contain only geometries, we need to provide information about the start and end times for which each label is valid. in this case, one should use the function `sits_get_data()` to retrieve data from a data cube based on the contents of the shapefile. The parameter `shp_attr` (optional) indicates the name of the column on the shapefile which contains the label to be associated to each time series; the parameter `.n_shp_pol` (defaults to 20) determines the number of samples to be extracted from each polygon. 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # define the input shapefile (consisting of POLYGONS)
 shp_file <- system.file("extdata/shapefiles/parcel_agriculture.shp", 
                         package = "sits")
@@ -143,3 +143,33 @@ data
 ```
 
 
+The SITS package enables uses to create data cube based on files. In this case, these files should be organized as `raster bricks`. A RasterBrick is a multi-layer raster object used by the \emph{R} `raster` package.  Each brick is a multi-layer file, containing different time instances of one spectral band. To allow users to create data cubes based on files, SITS needs to know what is the timeline of the data sets and what are the names of the files that contain the RasterBricks.  The example below shows one bricks containing 392 time instances of the "ndvi" band for the years 2000 to 2016. The timeline is available as part of the SITS package. In this example, as in most cases using raster bricks, images are stored as GeoTiff files.
+
+Since GeoTiff files do not contain information about satellites and sensors, it is best practice to provide information on satellite and sensor. 
+
+```{r}
+# Obtain a raster brick with 23 instances for one year
+# Select the band "ndvi", "evi" from bricks  available in the "sits" package
+ndvi_file <- system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif", 
+                         package = "sits")
+
+# Obtain the associated timeline
+timeline <- data("timeline_2000_2017")
+
+# create a raster metadata file based on the information about the files
+raster_cube <- sits_cube(type = "BRICK",
+                         name = "Sinop", 
+                         satellite = "TERRA",
+                         sensor = "MODIS",
+                         timeline = timeline,
+                         bands = c("ndvi"), 
+                         files = c(ndvi_file))
+
+# get information on the data cube 
+raster_cube %>% dplyr::select(type, URL, satellite, sensor)
+# get information on the coverage
+raster_cube %>% dplyr::select(xmin, xmax, ymin, ymax)
+```
+
+To create the raster cube, we a set of consistent raster bricks (one for each satellite band) and a `timeline` that matches the input images of the raster brick. Once created, the coverage can be used either to retrieve time series data from the raster bricks using `sits_get_data()` or to do the raster classification by calling the function `sits_classify`.
+ 
