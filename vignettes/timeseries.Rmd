@@ -178,7 +178,8 @@ samples.csv <- system.file("extdata/samples/samples_sinop_crop.csv",
                                    package = "sits")
 # get the points from a data cube in raster brick format
 points.tb <- sits_get_data(raster_cube, file = samples.csv)
-                           
+        
+                   
 # show the tibble with the points
 points.tb
 ```
@@ -195,7 +196,7 @@ a database.
 # create RSQLite connection at the user home directory
 home <- Sys.getenv('HOME')
 db_file <- paste0(home,"/sits.sql")
-conn <- sits_db_create(db_file)
+conn <- sits_db_connect(db_file)
 
 # write a set of time series
 conn <- sits_db_write(conn, "cerrado_2classes", cerrado_2classes)
@@ -213,23 +214,20 @@ cube to the database.
 # files to build a raster cube
 files <- c(system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
                            package = "sits"))
-
 # create a raster cube file based on the information about the files
 raster.tb <- sits_cube(type = "BRICK", name  = "Sinop-crop",
                        satellite = "TERRA", sensor = "MODIS",
                        timeline = timeline_modis_392, bands = "ndvi",
                        files = files)
-
 # write the description of a raster cube
 conn <- sits_db_write(conn, "sinop", raster.tb)
-
 # read the contents of a raster cube
 cube_raster <- sits_db_read(conn, "sinop")
 # show the retrieved information
 cube_raster
 ```
 
-One can also retrieve information on the contents of the database using `sits_db_info`.
+To retrieve information on the contents of the database, use `sits_db_info`.
 
 ```{r}
 # retrieve the contents of the database
