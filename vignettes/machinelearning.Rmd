@@ -364,3 +364,93 @@ class.tb <- point_mt_2bands %>%
     sits_classify(lstm_fcn_model) %>% 
     plot(bands = c("ndvi", "evi"))
 ```
+
+# Validation techniques
+
+Validation is a process undertaken on models to estimate some error associated with them, and hence has been used widely in different scientific disciplines. Here, we are interested in estimating the prediction error associated to some model. For this purpose, we concentrate on the *cross-validation* approach, probably the most used validation technique [@Hastie2009].
+
+To be sure, cross-validation estimates the expected prediction error. It uses part of the available samples to fit the classification model, and a different part to test it. The so-called *k-fold* validation, we split the data into $k$ partitions with approximately the same size and proceed by fitting the model and testing it $k$ times. At each step, we take one distinct partition for test and the remaining ${k-1}$ for training the model, and calculate its prediction error for classifying the test partition. A simple average gives us an estimation of the expected prediction error. 
+
+A natural question that arises is: *how good is this estimation?* According to @Hastie2009, there is a bias-variance trade-off in choice of $k$. If $k$ is set to the number of samples, we obtain the so-called *leave-one-out* validation, the estimator gives a low bias for the true expected error, but produces a high variance expectation. This can be computational expensive as it requires the same number of fitting process as the number of samples. On the other hand, if we choose ${k=2}$, we get a high biased expected prediction error estimation that overestimates the true prediction error, but has a low variance. The recommended choices of $k$ are $5$ or $10$ [@Hastie2009], which somewhat overestimates the true prediction error.
+
+`sits_kfold_validate()` gives support the k-fold validation in `sits`. The following code gives an example on how to proceed a k-fold cross-validation in the package. It perform a five-fold validation using SVM classification model as a default classifier. We can see in the output text the corresponding confusion matrix and the accuracy statistics (overall and by class).
+
+```{r}
+# perform a five fold validation for the "cerrado_2classes" data set
+# Random Forest machine learning method using default parameters
+prediction.mx <- sits_kfold_validate(cerrado_2classes, 
+                                     folds = 5, 
+                                     ml_method = sits_rfor())
+# prints the output confusion matrix and statistics 
+sits_conf_matrix(prediction.mx)
+```
+
+# Comparing different validation methods
+
+One useful function in SITS is the capacity to compare different validation methods and store them in an XLS file for further analysis. The following example shows how to do this, using the Mato Grosso data set. 
+
+```{r}
+
+# Retrieve the set of samples for the Mato Grosso region (provided by EMBRAPA)
+data("samples_mt_4bands")
+
+# create a list to store the results
+results <- list()
+
+# adjust the multicores parameters to suit your machine
+
+## SVM model
+conf_svm.tb <- sits_kfold_validate(samples_mt_4bands,
+                                   folds = 5,
+                                   multicores = 2,
+                            ml_method = sits_svm(kernel = "radial", cost = 10))
+
+print("== Confusion Matrix = SVM =======================")
+conf_svm.mx <- sits_conf_matrix(conf_svm.tb)
+
+# Give a name to the SVM model
+conf_svm.mx$name <- "svm_10"
+
+# store the result
+results[[length(results) + 1]] <- conf_svm.mx
+
+
+# =============== Random Forest ==============================
+
+conf_rfor.tb <- sits_kfold_validate(samples_mt_4bands,
+                                    folds = 5,
+                                    multicores = 1,
+                                    ml_method = sits_rfor(num_trees = 500))
+print("== Confusion Matrix = RFOR =======================")
+conf_rfor.mx <- sits_conf_matrix(conf_rfor.tb)
+
+# Give a name to the model
+conf_rfor.mx$name <- "rfor_500"
+
+# store the results in a list
+results[[length(results) + 1]] <- conf_rfor.mx
+
+# =============== XGBOOST ==============================
+# extreme gradient boosting
+conf_xgb.tb <- sits_kfold_validate(samples_mt_4bands,
+                                   folds = 5,
+                                   multicores = 32,
+                                   ml_method = sits_xgboost(nthread = 32))
+
+# print the accuracy of the Multinomial log-linear
+print("== Confusion Matrix = XGB =======================")
+conf_xgb.mx <- sits_conf_matrix(conf_xgb.tb)
+
+# Give a name to the model
+conf_xgb.mx$name <- "xgboost"
+
+# store the results in a list
+results[[length(results) + 1]] <- conf_xgb.mx
+
+# choose the output directory
+WD = getwd()
+
+# Save to an XLS file
+sits_to_xlsx(results, file = "./accuracy_mt_ml.xlsx")
+````
+

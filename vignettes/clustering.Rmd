@@ -179,5 +179,5 @@ cluster_overall$mixture_cluster
 
 Finally, a graphic showing the mixture within each cluster is presented.
 ```{r}
-sits_som_plot_clusters(cluster_overall, "Confusion by samples")
+plot(cluster_overall, "Confusion by samples")
 ```
