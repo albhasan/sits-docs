@@ -126,7 +126,7 @@ class.tb <- point_mt_4bands %>%
 sits_show_prediction(class.tb)
 ```
 
-The result shows the tendency of the random forest classifier to be robust to outliers and to be able to deal with irrelevant inputs [@Hastie2009]. Performs internal variable selection helps the results be robust to outliers and noise, a common feature in image time series. However, despite being robust, random forest tend to overemphasize some variables and thus rarely turn out to be the classifier with the smallest error. One reason is that the performance of random forest tends to stabilise after a part of the trees are grown [@Hastie2009]. For this reason, in classification comparisons, its performance tends to be weaker than methods such as extreme gradient boosting, described below. Nevertheless, random forest classifiers can be quite useful to provide a baseline to compare with more sophisticated methods. 
+The result shows the tendency of the random forest classifier to be robust to outliers and to be able to deal with irrelevant inputs [@Hastie2009]. Performs internal variable selection helps the results be robust to outliers and noise, a common feature in image time series. However, despite being robust, random forest tend to overemphasize some variables and thus rarely turn out to be the classifier with the smallest error. One reason is that the performance of random forest tends to stabilise after a part of the trees are grown [@Hastie2009].  Random forest classifiers can be quite useful to provide a baseline to compare with more sophisticated methods. 
 
 # Support Vector Machines
 
@@ -234,13 +234,13 @@ The `sits_FCN` function uses the architecture proposed by Wang as its default, a
 # train a machine learning model using deep learning
 fcn_model <- sits_train(samples_mt_4bands, 
                         sits_FCN(
-                            layers           = c(128, 128, 128),
-                            kernels          = c(5, 3, 1),
+                            layers           = c(64, 256, 64),
+                            kernels          = c(8, 5, 3),
                             activation       = 'relu',
                             L2_rate          = 1e-06,
                             epochs           = 100,
                             batch_size       = 128,
-                            verbose          = 1) )
+                            verbose          = 0) )
 # show training evolution
 plot(fcn_model)
 ```
@@ -262,16 +262,16 @@ The Residual Network (ResNet) is a variation of the fullCNN network proposed by 
 knitr::include_graphics(system.file("extdata/markdown/figures", "resnet.png", package = "sits.docs"))
 ```
 
-In SITS, the ResNet is implemented using the `sits_resnet` function. The default parameters are those proposed by @Wang2017, and we also benefited from the code provided by @Fawaz2019 ( https://github.com/hfawaz/dl-4-tsc). The first parameter is `blocks`, which controls the number of blocks and the size of filters in each block. By default, the model implements three blocks, the first with 64 filters and the others with 128 filters. Users can control the number of blocks and filter size by changing this parameter. The parameter `kernels` controls the size the of kernels of the three layers inside each block. @Wang2017 proposes to use kernels of sizes 8,5, and 3. We have found out that it is useful to experiment a bit with these kernel sizes in the case of satellite image time series. The default activation is "relu", which is recommended in the literature to reduce the problem of vanishing gradients. The default optimizer is the same as proposed in @Wang2017 and @Fawaz2019. In the case of the 2-band Mato Grosso data set, the estimated accuracy is 95.8%. 
+In SITS, the ResNet is implemented using the `sits_resnet` function. The default parameters are those proposed by @Wang2017, and we also benefited from the code provided by @Fawaz2019 ( https://github.com/hfawaz/dl-4-tsc). The first parameter is `blocks`, which controls the number of blocks and the size of filters in each block. By default, the model implements three blocks, the first with 64 filters and the others with 128 filters. Users can control the number of blocks and filter size by changing this parameter. The parameter `kernels` controls the size the of kernels of the three layers inside each block. We have found out that it is useful to experiment a bit with these kernel sizes in the case of satellite image time series. The default activation is "relu", which is recommended in the literature to reduce the problem of vanishing gradients. The default optimizer is the same as proposed in @Wang2017 and @Fawaz2019. In the case of the 2-band Mato Grosso data set, the estimated accuracy is 95.8%. 
 
 ```{r, warning = FALSE, message = FALSE}
 # train a machine learning model using ResNet
-resnet_model <- sits_train(mt_2bands, 
+resnet_model <- sits_train(samples_mt_4bands, 
                        sits_ResNet(
                           blocks               = c(32, 64, 64),
                           kernels              = c(9, 7, 3),
                           activation           = 'relu',
-                          epochs               = 60,
+                          epochs               = 100,
                           batch_size           = 128,
                           validation_split     = 0.2,
                           verbose              = 0) )
@@ -282,7 +282,7 @@ plot(resnet_model)
 Then, we classify a 16-year time series using the DL model
 ```{r}
 # Classify using DL model and plot the result
-class.tb <- point_mt_2bands %>% 
+class.tb <- point_mt_4bands %>% 
     sits_classify(resnet_model) %>% 
     plot(bands = c("ndvi", "evi"))
 ```
@@ -300,7 +300,7 @@ The function `sits_tempCNN` implements the model, using the default parameters p
 
 ```{r, warning = FALSE, message = FALSE}
 # train a machine learning model using tempCNN
-tCNN_model <- sits_train(mt_2bands, 
+tCNN_model <- sits_train(samples_mt_4bands, 
                        sits_TempCNN(
                           cnn_layers           = c(32, 32, 32),
                           cnn_kernels          = c(5, 5, 5),
@@ -322,7 +322,7 @@ plot(tCNN_model)
 Then, we classify a 16-year time series using the DL model
 ```{r}
 # Classify using DL model and plot the result
-class.tb <- point_mt_2bands %>% 
+class.tb <- point_mt_4bands %>% 
     sits_classify(tCNN_model) %>% 
     plot(bands = c("ndvi", "evi"))
 ```
@@ -340,7 +340,7 @@ knitr::include_graphics(system.file("extdata/markdown/figures", "lstm-cnn.png", 
 In the SITS package, the combined LSTM-CNN architecture is implemented by the `sits_LSTM_CNN` function. The default values are similar those proposed by @Karim2019b. The parameter `lstm_units` controls the number of units in the LSTM cell at every time step of the network. @Karim2019b proposes an LSTM with 8 units, each with a dropout rate of 80%, which are controlled by parameters `lstm_units` and `lstm_dropout`. In initial experiments, we got a better performance with an LSTM with 16 units. As proposed by @Karim2019b, the CNN layers have filter sizes of {128, 256, 128} and kernel convolution sizes of {8, 5, 3}, controled by the parameters `cnn_layers` and `cnn_kernels`. One should experiment with these parameters, and consider the simulations carried out by @Pelletier2019 (see above), where the authors found that an FCN network of sizes {64, 64, 64} with kernels sizes of {5, 5, 5} had best performance in their case study. In this example, the estimated accuracy of the model was 94.7%. 
 
 ```{r, message = FALSE, warning = FALSE}
-lstm_fcn_model <- sits_train(mt_2bands, 
+lstm_fcn_model <- sits_train(samples_mt_4bands, 
                        sits_LSTM_FCN(
                           lstm_units          = 16,
                           lstm_dropout        = 0.80,
@@ -359,97 +359,7 @@ plot(lstm_fcn_model)
 Then, we classify a 16-year time series using the DL model
 ```{r}
 # Classify using DL model and plot the result
-class.tb <- point_mt_2bands %>% 
+class.tb <- point_mt_4bands %>% 
     sits_classify(lstm_fcn_model) %>% 
     plot(bands = c("ndvi", "evi"))
 ```
-
-# Validation techniques
-
-Validation is a process undertaken on models to estimate some error associated with them, and hence has been used widely in different scientific disciplines. Here, we are interested in estimating the prediction error associated to some model. For this purpose, we concentrate on the *cross-validation* approach, probably the most used validation technique [@Hastie2009].
-
-To be sure, cross-validation estimates the expected prediction error. It uses part of the available samples to fit the classification model, and a different part to test it. The so-called *k-fold* validation, we split the data into $k$ partitions with approximately the same size and proceed by fitting the model and testing it $k$ times. At each step, we take one distinct partition for test and the remaining ${k-1}$ for training the model, and calculate its prediction error for classifying the test partition. A simple average gives us an estimation of the expected prediction error. 
-
-A natural question that arises is: *how good is this estimation?* According to @Hastie2009, there is a bias-variance trade-off in choice of $k$. If $k$ is set to the number of samples, we obtain the so-called *leave-one-out* validation, the estimator gives a low bias for the true expected error, but produces a high variance expectation. This can be computational expensive as it requires the same number of fitting process as the number of samples. On the other hand, if we choose ${k=2}$, we get a high biased expected prediction error estimation that overestimates the true prediction error, but has a low variance. The recommended choices of $k$ are $5$ or $10$ [@Hastie2009], which somewhat overestimates the true prediction error.
-
-`sits_kfold_validate()` gives support the k-fold validation in `sits`. The following code gives an example on how to proceed a k-fold cross-validation in the package. It perform a five-fold validation using SVM classification model as a default classifier. We can see in the output text the corresponding confusion matrix and the accuracy statistics (overall and by class).
-
-```{r}
-# perform a five fold validation for the "cerrado_2classes" data set
-# Random Forest machine learning method using default parameters
-prediction.mx <- sits_kfold_validate(cerrado_2classes, 
-                                     folds = 5, 
-                                     ml_method = sits_rfor())
-# prints the output confusion matrix and statistics 
-sits_conf_matrix(prediction.mx)
-```
-
-# Comparing different validation methods
-
-One useful function in SITS is the capacity to compare different validation methods and store them in an XLS file for further analysis. The following example shows how to do this, using the Mato Grosso data set. 
-
-```{r}
-
-# Retrieve the set of samples for the Mato Grosso region (provided by EMBRAPA)
-data("samples_mt_4bands")
-
-# create a list to store the results
-results <- list()
-
-# adjust the multicores parameters to suit your machine
-
-## SVM model
-conf_svm.tb <- sits_kfold_validate(samples_mt_4bands,
-                                   folds = 5,
-                                   multicores = 2,
-                            ml_method = sits_svm(kernel = "radial", cost = 10))
-
-print("== Confusion Matrix = SVM =======================")
-conf_svm.mx <- sits_conf_matrix(conf_svm.tb)
-
-# Give a name to the SVM model
-conf_svm.mx$name <- "svm_10"
-
-# store the result
-results[[length(results) + 1]] <- conf_svm.mx
-
-
-# =============== Random Forest ==============================
-
-conf_rfor.tb <- sits_kfold_validate(samples_mt_4bands,
-                                    folds = 5,
-                                    multicores = 1,
-                                    ml_method = sits_rfor(num_trees = 500))
-print("== Confusion Matrix = RFOR =======================")
-conf_rfor.mx <- sits_conf_matrix(conf_rfor.tb)
-
-# Give a name to the model
-conf_rfor.mx$name <- "rfor_500"
-
-# store the results in a list
-results[[length(results) + 1]] <- conf_rfor.mx
-
-# =============== XGBOOST ==============================
-# extreme gradient boosting
-conf_xgb.tb <- sits_kfold_validate(samples_mt_4bands,
-                                   folds = 5,
-                                   multicores = 32,
-                                   ml_method = sits_xgboost(nthread = 32))
-
-# print the accuracy of the Multinomial log-linear
-print("== Confusion Matrix = XGB =======================")
-conf_xgb.mx <- sits_conf_matrix(conf_xgb.tb)
-
-# Give a name to the model
-conf_xgb.mx$name <- "xgboost"
-
-# store the results in a list
-results[[length(results) + 1]] <- conf_xgb.mx
-
-# choose the output directory
-WD = getwd()
-
-# Save to an XLS file
-sits_to_xlsx(results, file = "./accuracy_mt_ml.xlsx")
-````
-

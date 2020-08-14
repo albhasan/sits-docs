@@ -43,7 +43,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction: Clustering  for sample quality control
 
-One of the key challenges when using samples to train machine learning classification models is assessing their quality. Noisy and imperfect training samples can have a negative effect on classification performance [@Frenay2013].  Therefore, it is useful to apply pre-processing methods to improve the quality of the samples and to remove those that might have been wrongly labeled or that have low discriminatory power. Representative samples lead to good classification maps. `sits` provides support for two clustering methods to test sample quality: (a) Agglomerative Hierarchical Clustering (AHC); (b)  Self-organizing Maps (SOM).
+One of the key challenges when using samples to train machine learning classification models is assessing their quality. Noisy and imperfect training samples can have a negative effect on classification performance [@Frenay2013].  
+There are two main sources of noise and errors in satellite image time series. One effect is \emph{feature noise}, caused by clouds and inconsistencies in data calibration. The second effect is \emph{class noise}, when the label assigned to the sample is wrongly attributed. Class noise effects are common on large data sets. In particular, interpreters tend to group samples with different properties in the same category. For this reason, one needs good methods for quality control of large training data sets associated with satellite image time series. Our work thus addresses the question: \emph{How to reduce class noise in large training sets of satellite image time series?} 
+
+Many factors lead to \emph{class noise} in SITS. One of the main problems is the inherent variability of class signatures in space and time. When training data is collected over a large geographic region, natural variability of vegetation phenology can result in different patterns being assigned to the same label. Phenological patterns can vary spatially across a region and are strongly correlated with climate variations. A related issue is the limitation of crisp boundaries to describe the natural world. Class definition use idealised descriptions (e.g., "a savanna woodland has tree cover of 50\% to 90\% ranging from 8 to 15 meters in height"). However, in practice the boundaries between classes are fuzzy and sometimes overlap, making it hard to distinguish between them. Class noise can also result from labeling errors. Even trained analysts can make errors in class attributions. Despite the fact that machine learning techniques are robust to errors and inconsistencies in the training data, quality control of training data can make a significant difference in the resulting maps.  
+
+Therefore, it is useful to apply pre-processing methods to improve the quality of the samples and to remove those that might have been wrongly labeled or that have low discriminatory power. Representative samples lead to good classification maps. `sits` provides support for two clustering methods to test sample quality: (a) Agglomerative Hierarchical Clustering (AHC); (b)  Self-organizing Maps (SOM).
 
 # Hierachical clustering
 
@@ -106,8 +111,9 @@ sits_cluster_frequency(cleaned.tb)
 
 # Self-organizing maps
 
-As an alternative for hierachical clustering for quality control of training samples, SITS provides a clustering technique based on self-organizing maps (SOM). SOM is a dimensionality reduction technique [@Kohonen2001], where high-dimensional data is mapped into two dimensions, keeping the topological relations between data patterns. The input data is a high dimset of tranining samples which are typically of a high dimension. For example, a time series of 25 instances of 4 spectral bands is a 100-dimensional data set. The general idea of SOM-based clustering is that, by projecting the high-dimensional data set of training samples into a 2D map, the units of the map (called "neurons") compete for each sample. It is expected that good quality samples of each class should be close together in the resulting map. 
+As an alternative for hierachical clustering for quality control of training samples, SITS provides a clustering technique based on self-organizing maps (SOM). SOM is a dimensionality reduction technique [@Kohonen2001], where high-dimensional data is mapped into two dimensions, keeping the topological relations between data patterns. The input data is a high dimset of tranining samples which are typically of a high dimension. For example, a time series of 25 instances of 4 spectral bands is a 100-dimensional data set. The general idea of SOM-based clustering is that, by projecting the high-dimensional data set of training samples into a 2D map, the units of the map (called "neurons") compete for each sample. It is expected that good quality samples of each class should be close together in the resulting map. The neighbors of each neuron of a SOM map provide additional information on intra-class and inter-class variability. We apply Bayesian inference to the neighbourhoods of the SOM map to improve the evaluation of the the quality of each time series.  
 
+# Using SOM for time series clustering 
 
 The process of clustering  with SOM is done by `sits_cluster_som()` which creates a self-organizing map. First, a 2D grid of neurons is initialized randomly; each neuron is associated to a weight vector of the same dimension as the input space. For each time series sample, the algorithm finds the neuron with the smallest distance based on its weight vector. After the match, the neuron's weight vector and those of its neighbors are then updated. After all training samples are associated with neurons, each neuron is labeled using a majority vote, taking the most frequent class from the samples associated with it. In this way, SOM splits the output space into regions.  To increase the reliability of quality control procedures, the SOM clustering can be executed several times. Using this iterative procedure, the algorithm computes the probability that a sample belongs to each of the resulting clusters. From these probabilities, samples with similar phenological patterns are grouped together. This allows using SOM to detect and remove outliers; samples whose set of probabilities has a high variance are discarded.
 
@@ -136,7 +142,7 @@ As an example of the use of SOM clustering for quality control of samples, we ta
 # clustering time series using SOM
 som_cluster <-
     sits::sits_som_map(
-        prodes_226_064,
+        samples_mt_4bands,
         grid_xdim = 10,
         grid_ydim = 10,
         alpha = 1.0,
@@ -154,7 +160,7 @@ The output of the `sits_som_map` is a list with 4 tibbles:
 
 * one tibble with the summary association between the labels of original samples and the labels of the neurons of all iterations.
 
-To plot the kohonen map, use `plot.som_map()`, which can be called directly from `plot()`. The neurons are labelled using the majority voting.
+To plot the kohonen map, use `plot()`. The neurons are labelled using the majority voting.
 ```{r}
 plot(som_cluster)
 ```
@@ -179,5 +185,5 @@ cluster_overall$mixture_cluster
 
 Finally, a graphic showing the mixture within each cluster is presented.
 ```{r}
-plot(cluster_overall, "Confusion by samples")
+plot(cluster_overall)
 ```
