@@ -27,6 +27,8 @@ presentations, and papers.
 
   - [“Time Series classification using machine
     learning”](https://github.com/e-sensing/sits-docs/blob/master/doc/machinelearning.pdf)
+    
+  - [“Image Classification in Data Cubes using Satellite Image Time Series”](https://github.com/e-sensing/sits-docs/blob/master/doc/rasterclassification.pdf)
 
   - [“Post classification smoothing using Bayesian techniques in
     SITS”](https://github.com/e-sensing/sits-docs/blob/master/doc/smoothing.pdf)
