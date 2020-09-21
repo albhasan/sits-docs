@@ -71,7 +71,7 @@ One useful way of describing and understanding the samples is by plotting them. 
 # Select a subset of the samples to be plotted
 # Retrieve the set of samples for the Mato Grosso region 
 samples_mt_4bands %>% 
-    sits_select_bands(ndvi) %>% 
+    sits_select(bands = "NDVI") %>% 
     dplyr::filter(label == "Forest") %>% 
     plot()
 ```
@@ -112,7 +112,7 @@ One of the advantages of the random forest model is that the classification perf
 # Mato Grosso region for train the Random Forest model.
 rfor_model <- sits_train(samples_mt_4bands, sits_rfor())
 # Classify using Random Forest model and plot the result
-point_mt_4bands <- sits_select_bands(point_mt_6bands, ndvi, evi, nir, mir)
+point_mt_4bands <- sits_select(point_mt_6bands, bands = c("NDVI", "EVI", "NIR", "MIR"))
 class.tb <- point_mt_4bands %>% 
     sits_whittaker(lambda = 0.2, bands_suffix = "") %>% 
     sits_classify(rfor_model) %>% 
@@ -165,12 +165,7 @@ In SITS, the XGBoost method is implemented by the `sits_xbgoost()` function, whi
 ```{r}
 # Train a machine learning model for the mato grosso dataset using XGBOOST
 # The parameters are those of the "xgboost" package
-xgb_model <- sits_train(samples_mt_4bands, sits_xgboost(eta = 0.3, 
-                                                         gamma = 0.01,
-                                                         max_depth = 6,
-                                                         subsample = 0.9,
-                                                         nrounds = 100,
-                                                         verbose = FALSE))
+xgb_model <- sits_train(samples_mt_4bands, sits_xgboost())
 # Classify using SVM model and plot the result
 class.tb <- point_mt_4bands %>% 
     sits_whittaker(lambda = 0.25, bands_suffix = "") %>% 
