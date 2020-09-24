@@ -68,7 +68,7 @@ Given that we have used the tibble data format for the metadata and and the embe
 
 ```{r}
 # select NDVI band
-samples_ndvi.tb <- sits_select(samples_mt_4bands, ndvi)
+samples_ndvi.tb <- sits_select(samples_mt_4bands, "NDVI")
 # select only samples with Cerrado label
 samples_cerrado.tb <-
     dplyr::filter(samples_ndvi.tb, label == "Cerrado")
@@ -123,7 +123,7 @@ A common situation is when users have samples available as shapefiles in point f
 
 ```{r, warning = FALSE, message = FALSE}
 # define the input shapefile (consisting of POLYGONS)
-shp_file <- system.file("extdata/shapefiles/parcel_agriculture.shp", 
+shp_file <- system.file("extdata/shapefiles/agriculture/parcel_agriculture.shp", 
                         package = "sits")
 # set the start and end dates 
 start_date <- lubridate::ymd("2012-08-29")
