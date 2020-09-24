@@ -64,11 +64,11 @@ sits_labels(samples_mt_4bands)
 
 In many cases, it is useful to relabel the data set. For example, there may be situations when one wants to use a smaller set of labels, since samples in one label on the original set may not be distinguishable from samples with other labels. We then could use `sits_relabel()`, which requires a conversion list (for details, see `?sits_relabel`).
 
-Given that we have used the tibble data format for the metadata and and the embedded time series, one can use the functions from `dplyr`, `tidyr` and `purrr` packages of the `tidyverse` [@Wickham2017] to process the data. For example, the following code uses `sits_select_bands()` to get a subset of the sample data set with two bands (NDVI and EVI) and then uses the `dplyr::filter()` to select the samples labelled either as "Cerrado" or "Pasture". 
+Given that we have used the tibble data format for the metadata and and the embedded time series, one can use the functions from `dplyr`, `tidyr` and `purrr` packages of the `tidyverse` [@Wickham2017] to process the data. For example, the following code uses `sits_select()` to get a subset of the sample data set with two bands (NDVI and EVI) and then uses the `dplyr::filter()` to select the samples labelled either as "Cerrado" or "Pasture". 
 
 ```{r}
 # select NDVI band
-samples_ndvi.tb <- sits_select_bands(samples_mt_4bands, ndvi)
+samples_ndvi.tb <- sits_select(samples_mt_4bands, ndvi)
 # select only samples with Cerrado label
 samples_cerrado.tb <-
     dplyr::filter(samples_ndvi.tb, label == "Cerrado")
