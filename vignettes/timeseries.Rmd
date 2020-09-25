@@ -154,10 +154,11 @@ ndvi_file <- system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
                          package = "sits")
 
 # Obtain the associated timeline
-data("timeline_2000_2017", package = "sits")
+time_file <- system.file("extdata/Sinop", "timeline_2014.txt", package = "inSitu")
+timeline_2013_2014 <- scan(time_file, character())
 
 # create a raster metadata file based on the information about the files
-raster_cube <- sits_cube(type = "BRICK",
+raster_cube <- sits_cube(type = "RASTER",
                          name = "Sinop", 
                          satellite = "TERRA",
                          sensor = "MODIS",
@@ -215,7 +216,7 @@ cube to the database.
 files <- c(system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
                            package = "sits"))
 # create a raster cube file based on the information about the files
-raster.tb <- sits_cube(type = "BRICK", name  = "Sinop-crop",
+raster.tb <- sits_cube(type = "RASTER", name  = "Sinop-crop",
                        satellite = "TERRA", sensor = "MODIS",
                        timeline = timeline_modis_392, bands = "ndvi",
                        files = files)
