@@ -36,6 +36,7 @@ vignette: |
 devtools::load_all(".")
 library(sits)
 library(dtwclust)
+library(inSitu)
 require(sits)
 ```
 
@@ -143,7 +144,7 @@ devtools::install_github("e-sensing/inSitu")
 
 # Retrieve the set of samples for the Mato Grosso region 
 # Select the data for classification
-mato_grosso_samples <- inSitu::br_mt_1_8K_9classes_6bands
+mato_grosso_samples <- br_mt_1_8K_9classes_6bands
 mato_grosso_2bands  <- sits_select(mato_grosso_samples, c("ndvi", "evi"))
 
 # build the classification model

@@ -42,6 +42,7 @@ vignette: |
 devtools::load_all(".")
 library(sits)
 library(dtwclust)
+library(inSitu)
 require(sits)
 ```
 
@@ -361,7 +362,7 @@ Based on current experience, the classification of a MODIS tile (4800 x 4800) wi
 ```{r, eval = FALSE}
 # Retrieve the set of samples for the Mato Grosso region 
 # Select the data for classification
-mato_grosso_samples <- inSitu::br_mt_1_8K_9classes_6bands
+mato_grosso_samples <- br_mt_1_8K_9classes_6bands
 mato_grosso_2bands  <- sits_select(mato_grosso_samples, c("ndvi", "evi"))
 
 # build a machine learning model for this area

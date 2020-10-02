@@ -21,7 +21,8 @@ LazyData: true
 Imports:
     dplyr,
     lubridate,
-    sits
+    sits,
+    inSitu
 Suggests:
     aws.s3,
     caret,
